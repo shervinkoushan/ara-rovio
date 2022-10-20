@@ -7,8 +7,8 @@
   <param name="cam0_topic_name" value="/camera/color/image_raw"/>-->
   </node>
 </launch>
-<!-- roslaunch realsense2_camera rs_camera.launch enable_gyro:=true enable_accel:=true unite_imu_method:=linear_interpolation enable_infra1:=true -->
-<!-- rosrun topic_tools relay /camera/color/image_raw /cam0/image_raw -->
+<!-- roslaunch realsense2_camera rs_camera.launch enable_gyro:=true enable_accel:=true unite_imu_method:=linear_interpolation -->
+<!-- rosrun topic_tools relay /camera/color/grayscale_raw /cam0/image_raw -->
 <!-- rosrun topic_tools relay /camera/infra1/image_rect_raw/ /cam0/image_raw -->
 <!-- rosrun topic_tools relay /camera/imu /imu0 -->
 <!-- python3 to_grayscale.py /camera/color/image_raw /camera/color/grayscale_raw -->
