@@ -137,6 +137,7 @@ namespace rovio
     ros::Subscriber subImu_;
     ros::Subscriber subImg0_;
     ros::Subscriber subImg1_;
+    ros::Subscriber subDepthImg_;
     ros::Subscriber subGroundtruth_;
     ros::Subscriber subGroundtruthOdometry_;
     ros::Subscriber subVelocity_;
@@ -215,7 +216,7 @@ namespace rovio
       subImu_ = nh_.subscribe("imu0", 1000, &RovioNode::imuCallback, this);
       subImg0_ = nh_.subscribe("cam0/image_raw", 1000, &RovioNode::imgCallback0, this);
       subImg1_ = nh_.subscribe("cam1/image_raw", 1000, &RovioNode::imgCallback1, this);
-      subDepthImg = nh_.subscribe("camera/depth/image_rect_raw", 1000, &RovioNode::imgDepthCallback, this);
+      subDepthImg_ = nh_.subscribe("camera/depth/image_rect_raw", 1000, &RovioNode::imgDepthCallback, this);
       subGroundtruth_ = nh_.subscribe("pose", 1000, &RovioNode::groundtruthCallback, this);
       subGroundtruthOdometry_ = nh_.subscribe("odometry", 1000, &RovioNode::groundtruthOdometryCallback, this);
       subVelocity_ = nh_.subscribe("abss/twist", 1000, &RovioNode::velocityCallback, this);
@@ -500,11 +501,22 @@ namespace rovio
       }
     }
 
-    void imgDepthCallBack(const sensor_msgs::ImageConstPtr &img)
+    void imgDepthCallback(const sensor_msgs::ImageConstPtr &img)
     {
-      const auto cv_image = self.bridge.imgmsg_to_cv2(img, img.encoding);
-      const auto pix = (data.width / 2, data.height / 2)
-      std::cout<<'%s: Depth at center(%d, %d): %f(mm)\r' << self.topic, pix[0], pix[1], cv_image[pix[1], pix[0]]<<std::endl;
+      const double max_img_depth = 6.0;
+      cv_bridge::CvImagePtr cv_ptr;
+      try
+      {
+        cv_ptr = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::TYPE_8UC1);
+      }
+      catch (cv_bridge::Exception &e)
+      {
+        ROS_ERROR("cv_bridge exception: %s", e.what());
+        return;
+      }
+      cv::Mat cv_img;
+      cv_ptr->image.copyTo(cv_img);
+      cv::Mat metric_img = cv_img / 255.0 * max_img_depth; // Depth per pixel in meters
     }
 
     /** \brief Image callback for the camera with ID 0
