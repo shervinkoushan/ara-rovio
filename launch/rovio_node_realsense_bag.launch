@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<launch>
+  <node pkg="rovio" type="rovio_node" name="rovio" output="screen">
+  <param name="filter_config" value="$(find rovio)/cfg/rovio.info"/>
+  <param name="camera0_config" value="$(find rovio)/cfg/realsense_rgb.yaml"/>
+  <!--<param name="imu_topic_name" value="/camera/imu"/>
+  <param name="cam0_topic_name" value="/camera/color/image_raw"/>-->
+  </node>
+</launch>
+
+<!-- rosrun topic_tools relay /d455/accel/sample /imu0 -->
+<!-- python3 src/rovio/src/to_grayscale.py /d455/color/image_raw /cam0/image_raw -->
+<!-- rosbag play ~/datasets/LMF_2022-10-12-12-24-19_2.bag -->
