@@ -10,6 +10,7 @@
 namespace rovio
 {
 
+    // From https://superkogito.github.io/blog/2020/10/01/divide_image_using_opencv.html
     int divideImage(const cv::Mat &img, const int blockWidth, const int blockHeight, std::vector<cv::Mat> &blocks)
     {
         // Checking if the image was passed correctly
@@ -37,6 +38,23 @@ namespace rovio
 
             int x0 = 0;
             while (x0 < imgWidth)
+            {
+                // compute the block height
+                bwSize = ((x0 + blockWidth) > imgWidth) * (blockWidth - (x0 + blockWidth - imgWidth)) + ((x0 + blockWidth) <= imgWidth) * blockWidth;
+
+                // crop block
+                blocks.push_back(img(cv::Rect(x0, y0, bwSize, bhSize)).clone());
+
+                // update x-coordinate
+                x0 = x0 + blockWidth;
+            }
+
+            // update y-coordinate
+            y0 = y0 + blockHeight;
         }
+        return EXIT_SUCCESS;
+    }
+
+} // namespace rovio
 
 #endif /* IMAGEPYRAMID_HPP_ */
