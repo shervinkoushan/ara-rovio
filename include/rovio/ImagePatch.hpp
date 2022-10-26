@@ -55,6 +55,20 @@ namespace rovio
         return EXIT_SUCCESS;
     }
 
+    // Computes the median of the given patch.
+    // Disregards the 0 values, as these are pixels where we have no information.
+    float medianOfMatrix(const cv::Mat &mat){
+        // Remove 0 valued pixels
+        cv::Mat matNonZero;
+        cv::findNonZero(mat, matNonZero);
+
+        // Compute median
+        cv::Mat matSorted;
+        cv::sort(matNonZero, matSorted, cv::SORT_EVERY_COLUMN + cv::SORT_ASCENDING);
+        float median = matSorted.at<float>(matSorted.rows/2, 0);
+        return median;
+    }
+
 } // namespace rovio
 
-#endif /* IMAGEPYRAMID_HPP_ */
+#endif /* IMAGEPATCH_HPP_ */
