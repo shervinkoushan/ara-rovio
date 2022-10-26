@@ -504,20 +504,26 @@ namespace rovio
 
     void imgDepthCallback(const sensor_msgs::ImageConstPtr &img)
     {
-      const double max_img_depth = 6.0;
-      cv_bridge::CvImagePtr cv_ptr;
+      const double maxImgDepth = 6.0;
+      cv_bridge::CvImagePtr cvPtr;
       try
       {
-        cv_ptr = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::TYPE_8UC1);
+        cvPtr = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::TYPE_8UC1);
       }
       catch (cv_bridge::Exception &e)
       {
         ROS_ERROR("cv_bridge exception: %s", e.what());
         return;
       }
-      cv::Mat cv_img;
-      cv_ptr->image.copyTo(cv_img);
-      cv::Mat metric_img = cv_img / 255.0 * max_img_depth; // Depth per pixel in meters
+      cv::Mat cvImg;
+      cvPtr->image.copyTo(cvImg);
+      cv::Mat metricImg = cvImg / 255.0 * maxImgDepth; // Depth per pixel in meters
+
+      const int blockw = 120;
+      const int blockh = 135;
+
+      cv::Mat patchedImg;
+      rovio::computeMedianPatches(metricImg, blockw, blockh, patchedImg);
     }
 
     /** \brief Image callback for the camera with ID 0

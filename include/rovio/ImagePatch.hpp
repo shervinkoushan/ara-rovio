@@ -57,7 +57,8 @@ namespace rovio
 
     // Computes the median of the given patch.
     // Disregards the 0 values, as these are pixels where we have no information.
-    float medianOfMatrix(const cv::Mat &mat){
+    float medianOfMatrix(const cv::Mat &mat)
+    {
 
         // Find indices of non zero pizels
         cv::Mat matNonZero;
@@ -74,7 +75,7 @@ namespace rovio
         std::sort(nonZeroValues.begin(), nonZeroValues.end());
 
         // Compute the median
-        float median;
+        float median = 0.0;
         if (nonZeroValues.size() % 2 == 0)
         {
             median = (nonZeroValues[nonZeroValues.size() / 2 - 1] + nonZeroValues[nonZeroValues.size() / 2]) / 2;
@@ -87,6 +88,40 @@ namespace rovio
         return median;
     }
 
+    // Compute patches, calculate median and return original image with median values in the patches
+    void computeMedianPatches(const cv::Mat &img, const int blockWidth, const int blockHeight, cv::Mat &imgMedianPatches)
+    {
+        // Divide the image into patches
+        std::vector<cv::Mat> blocks;
+        divideImage(img, blockWidth, blockHeight, blocks);
+        std::cout << "Number of blocks: " << blocks.size() << std::endl;
+
+        // Compute the median of each patch
+        std::vector<float> medians;
+        for (int i = 0; i < blocks.size(); i++)
+        {
+            medians.push_back(medianOfMatrix(blocks[i]));
+        }
+        std::cout << "Medians calculated" << std::endl;
+
+        // Create a new image with the same size as the original image
+        imgMedianPatches = cv::Mat::zeros(img.size(), img.type());
+
+        // Fill the new image with the median values
+        int y0 = 0;
+        int i = 0;
+        while (y0 < img.rows)
+        {
+            int x0 = 0;
+            while (x0 < img.cols)
+            {
+                imgMedianPatches(cv::Rect(x0, y0, blockWidth, blockHeight)) = medians[i];
+                x0 = x0 + blockWidth;
+                i++;
+            }
+            y0 = y0 + blockHeight;
+        }
+    }
 } // namespace rovio
 
 #endif /* IMAGEPATCH_HPP_ */
