@@ -58,14 +58,32 @@ namespace rovio
     // Computes the median of the given patch.
     // Disregards the 0 values, as these are pixels where we have no information.
     float medianOfMatrix(const cv::Mat &mat){
-        // Remove 0 valued pixels
+
+        // Find indices of non zero pizels
         cv::Mat matNonZero;
         cv::findNonZero(mat, matNonZero);
 
-        // Compute median
-        cv::Mat matSorted;
-        cv::sort(matNonZero, matSorted, cv::SORT_EVERY_COLUMN + cv::SORT_ASCENDING);
-        float median = matSorted.at<float>(matSorted.rows/2, 0);
+        // Create a vector of the non zero values
+        std::vector<float> nonZeroValues;
+        for (int i = 0; i < matNonZero.rows; i++)
+        {
+            nonZeroValues.push_back(mat.at<float>(matNonZero.at<cv::Point>(i)));
+        }
+
+        // Sort the vector
+        std::sort(nonZeroValues.begin(), nonZeroValues.end());
+
+        // Compute the median
+        float median;
+        if (nonZeroValues.size() % 2 == 0)
+        {
+            median = (nonZeroValues[nonZeroValues.size() / 2 - 1] + nonZeroValues[nonZeroValues.size() / 2]) / 2;
+        }
+        else
+        {
+            median = nonZeroValues[nonZeroValues.size() / 2];
+        }
+
         return median;
     }
 
