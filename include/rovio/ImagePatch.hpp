@@ -9,50 +9,6 @@
 
 namespace rovio
 {
-
-    // From https://superkogito.github.io/blog/2020/10/01/divide_image_using_opencv.html
-    int divideImage(const cv::Mat &img, const int blockWidth, const int blockHeight, std::vector<cv::Mat> &blocks)
-    {
-        // Checking if the image was passed correctly
-        if (!img.data || img.empty())
-        {
-            std::wcout << "Image Error: Cannot load image to divide." << std::endl;
-            return EXIT_FAILURE;
-        }
-
-        // init image dimensions
-        int imgWidth = img.cols;
-        int imgHeight = img.rows;
-
-        // init block dimensions
-        int bwSize;
-        int bhSize;
-
-        int y0 = 0;
-        while (y0 < imgHeight)
-        {
-            // compute the block height
-            bhSize = ((y0 + blockHeight) > imgHeight) * (blockHeight - (y0 + blockHeight - imgHeight)) + ((y0 + blockHeight) <= imgHeight) * blockHeight;
-
-            int x0 = 0;
-            while (x0 < imgWidth)
-            {
-                // compute the block height
-                bwSize = ((x0 + blockWidth) > imgWidth) * (blockWidth - (x0 + blockWidth - imgWidth)) + ((x0 + blockWidth) <= imgWidth) * blockWidth;
-
-                // crop block
-                blocks.push_back(img(cv::Rect(x0, y0, bwSize, bhSize)).clone());
-
-                // update x-coordinate
-                x0 = x0 + blockWidth;
-            }
-
-            // update y-coordinate
-            y0 = y0 + blockHeight;
-        }
-        return EXIT_SUCCESS;
-    }
-
     // Computes the median of the given patch.
     // Disregards the 0 values, as these are pixels where we have no information.
     float medianOfMatrix(const cv::Mat &mat)
@@ -91,12 +47,52 @@ namespace rovio
         return median;
     }
 
+    // From https://superkogito.github.io/blog/2020/10/01/divide_image_using_opencv.html
+    int divideImage(const cv::Mat &img, const int blockWidth, const int blockHeight, std::vector<cv::Mat> &blocks, cv::Mat &newImg)
+    {
+        // Checking if the image was passed correctly
+        if (!img.data || img.empty())
+        {
+            std::wcout << "Image Error: Cannot load image to divide." << std::endl;
+            return EXIT_FAILURE;
+        }
+
+        newImg = img.clone();
+
+        const int patchSize = 6;
+        // Padded img
+        cv::Mat paddedImg;
+        cv::copyMakeBorder(img, paddedImg, patchSize, patchSize, patchSize, patchSize, cv::BORDER_WRAP);
+
+        for (int x = 0; x < img.rows; x++)
+        {
+            for (int y = 0; y < img.cols; y++)
+            {
+                int x_real = x + patchSize;
+                int y_real = y + patchSize;
+
+                int x_i = x_real - patchSize;
+                int x_s = x_real + patchSize + 1;
+                int y_i = y_real - patchSize;
+                int y_s = y_real + patchSize + 1;
+
+                cv::Mat curr_patch = paddedImg(cv::Range(x_i, x_s), cv::Range(y_i, y_s));
+
+                float median = medianOfMatrix(curr_patch);
+                newImg.at<float>(x, y) = median;
+            }
+        }
+
+        return EXIT_SUCCESS;
+    }
+
     // Compute patches, calculate median and return original image with median values in the patches
     void computeMedianPatches(const cv::Mat &img, const int blockWidth, const int blockHeight, cv::Mat &imgMedianPatches)
     {
         // Divide the image into patches
         std::vector<cv::Mat> blocks;
-        divideImage(img, blockWidth, blockHeight, blocks);
+        divideImage(img, blockWidth, blockHeight, blocks, imgMedianPatches);
+        return;
 
         // Compute the median of each patch
         std::vector<float> medians;
