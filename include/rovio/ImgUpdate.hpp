@@ -72,6 +72,7 @@ class ImgUpdateMeasAuxiliary: public LWF::AuxiliaryBase<ImgUpdateMeasAuxiliary<S
  public:
   ImgUpdateMeasAuxiliary(){
     reset(0.0);
+    depthImg_ = cv::Mat(480,848,CV_32FC1);
   };
   virtual ~ImgUpdateMeasAuxiliary(){};
   void reset(const double t){
@@ -376,13 +377,6 @@ ImgOutlierDetection<typename FILTERSTATE::mtState>,false>{
   /** \brief Destructor
    */
   virtual ~ImgUpdate(){};
-
-  /** \brief 
-   */
-  float getFeatureDepth(const cv::Point2i& ptf, const cv::Mat& depthImg){
-    
-
-  }
 
   /** \brief Refresh the properties of the property handler
    */
@@ -1015,11 +1009,20 @@ ImgOutlierDetection<typename FILTERSTATE::mtState>,false>{
           f.mpStatistics_->lastPatchUpdate_ = filterState.t_;
           const float initRelDepthCovTemp_ = initCovFeature_(0,0);
 
-          int x = f.mpCoordinates->get_c().x
-          int y = f.mpCoordinates->get_c().y
+          int x = f.mpCoordinates_->get_c().x;
+          int y = f.mpCoordinates_->get_c().y;
           if ( x < 848 && y < 480){
-            float depth = meas.aux().depthImg[x][y]
-            f.mpDistance_-> 1.0 / depth ;
+            cv::Mat tmpDepth = meas.aux().depthImg_;
+            float depth = tmpDepth.at<float>(y,x); //TODO: optimize this...
+            
+            //std::cout << "depth at pixel " << x << ", " << y << ": " << depth << "\n";
+            
+            if (depth != 0.0) { 
+              f.mpDistance_->p_ = depth / 1000.0;
+              }
+            else {
+              f.mpDistance_->p_ = medianDepthParameters[camID];
+            }
           }
           else {
             f.mpDistance_->p_ = medianDepthParameters[camID];

@@ -535,7 +535,7 @@ namespace rovio
       pubImgDepthPatched_.publish(cvi->toImageMsg());
 
       // set depth img
-      imgUpdateMeas_.template get<mtImgMeas::_aux>().setDepthImg(patchedImg)
+      imgUpdateMeas_.template get<mtImgMeas::_aux>().setDepthImg(patchedImg);
     }
 
     /** \brief Image callback for the camera with ID 0
