@@ -533,6 +533,9 @@ namespace rovio
       cvi->encoding = sensor_msgs::image_encodings::TYPE_32FC1;
       cvi->image = patchedImg;
       pubImgDepthPatched_.publish(cvi->toImageMsg());
+
+      // set depth img
+      imgUpdateMeas_.template get<mtImgMeas::_aux>().setDepthImg(patchedImg)
     }
 
     /** \brief Image callback for the camera with ID 0
