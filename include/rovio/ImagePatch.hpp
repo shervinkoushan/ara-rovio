@@ -91,8 +91,13 @@ namespace rovio
         return median;
     }
 
+    void smoothImage(cv::Mat &img, const int kernelSize)
+    {
+        cv::GaussianBlur(img, img, cv::Size(kernelSize, kernelSize), 0, 0);
+    }
+
     // Compute patches, calculate median and return original image with median values in the patches
-    void computeMedianPatches(const cv::Mat &img, const int blockWidth, const int blockHeight, cv::Mat &imgMedianPatches)
+    void patchAndSmoothImage(const cv::Mat &img, const int blockWidth, const int blockHeight, cv::Mat &imgMedianPatches)
     {
         // Divide the image into patches
         std::vector<cv::Mat> blocks;
@@ -122,6 +127,9 @@ namespace rovio
             }
             y0 = y0 + blockHeight;
         }
+
+        // Smooth the image
+        smoothImage(imgMedianPatches, 15);
     }
 } // namespace rovio
 

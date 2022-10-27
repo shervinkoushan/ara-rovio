@@ -524,7 +524,7 @@ namespace rovio
       const int blockW = 16;
       const int blockH = 15;
       cv::Mat patchedImg;
-      rovio::computeMedianPatches(cvImg, blockW, blockH, patchedImg);
+      rovio::patchAndSmoothImage(cvImg, blockW, blockH, patchedImg);
 
       // Convert to img msg and publish
       cv_bridge::CvImagePtr cvi = cv_bridge::CvImagePtr(new cv_bridge::CvImage);
