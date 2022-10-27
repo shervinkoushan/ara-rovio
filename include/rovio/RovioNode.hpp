@@ -154,6 +154,7 @@ namespace rovio
     ros::Publisher pubMarkers_; /**<Publisher: Ros line marker, indicating the depth uncertainty of a landmark.*/
     ros::Publisher pubExtrinsics_[mtState::nCam_];
     ros::Publisher pubImuBias_;
+    ros::Publisher pubImgDepthPatched_;
 
     // Ros Messages
     geometry_msgs::TransformStamped transformMsg_;
@@ -227,6 +228,7 @@ namespace rovio
       srvResetToPoseFilter_ = nh_.advertiseService("rovio/reset_to_pose", &RovioNode::resetToPoseServiceCallback, this);
 
       // Advertise topics
+      pubImgDepthPatched_ = nh_.advertise<sensor_msgs::Image>("d455/depth/image_rect_raw_patched", 1000);
       pubTransform_ = nh_.advertise<geometry_msgs::TransformStamped>("rovio/transform", 1);
       pubOdometry_ = nh_.advertise<nav_msgs::Odometry>("rovio/odometry", 1);
       pubPoseWithCovStamped_ = nh_.advertise<geometry_msgs::PoseWithCovarianceStamped>("rovio/pose_with_covariance_stamped", 1);
@@ -508,7 +510,7 @@ namespace rovio
       cv_bridge::CvImagePtr cvPtr;
       try
       {
-        cvPtr = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::TYPE_8UC1);
+        cvPtr = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::TYPE_32FC1);
       }
       catch (cv_bridge::Exception &e)
       {
@@ -517,13 +519,22 @@ namespace rovio
       }
       cv::Mat cvImg;
       cvPtr->image.copyTo(cvImg);
-      cv::Mat metricImg = cvImg / 255.0 * maxImgDepth; // Depth per pixel in meters
 
       const int blockw = 120;
       const int blockh = 135;
 
       cv::Mat patchedImg;
-      rovio::computeMedianPatches(metricImg, blockw, blockh, patchedImg);
+      rovio::computeMedianPatches(cvImg, blockw, blockh, patchedImg);
+
+      // convert to img msg
+      cv_bridge::CvImagePtr cvi = cv_bridge::CvImagePtr(new cv_bridge::CvImage);
+      cvi->header.stamp = ros::Time::now();
+      cvi->header.frame_id = "camera";
+      cvi->encoding = sensor_msgs::image_encodings::TYPE_32FC1;
+      cvi->image = patchedImg;
+      pubImgDepthPatched_.publish(cvi->toImageMsg());
+
+      cv::Mat metricImg = patchedImg / 255.0 * maxImgDepth; // Depth per pixel in meters
     }
 
     /** \brief Image callback for the camera with ID 0
