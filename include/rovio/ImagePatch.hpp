@@ -23,8 +23,6 @@ namespace rovio
         // init image dimensions
         int imgWidth = img.cols;
         int imgHeight = img.rows;
-        std::wcout << "IMAGE SIZE: "
-                   << "(" << imgWidth << "," << imgHeight << ")" << std::endl;
 
         // init block dimensions
         int bwSize;
@@ -71,11 +69,16 @@ namespace rovio
             nonZeroValues.push_back(mat.at<float>(matNonZero.at<cv::Point>(i)));
         }
 
+        if (nonZeroValues.size() == 0)
+        {
+            return 0.0;
+        }
+
         // Sort the vector
         std::sort(nonZeroValues.begin(), nonZeroValues.end());
 
         // Compute the median
-        float median = 0.0;
+        float median;
         if (nonZeroValues.size() % 2 == 0)
         {
             median = (nonZeroValues[nonZeroValues.size() / 2 - 1] + nonZeroValues[nonZeroValues.size() / 2]) / 2;
@@ -94,7 +97,6 @@ namespace rovio
         // Divide the image into patches
         std::vector<cv::Mat> blocks;
         divideImage(img, blockWidth, blockHeight, blocks);
-        std::cout << "Number of blocks: " << blocks.size() << std::endl;
 
         // Compute the median of each patch
         std::vector<float> medians;
@@ -102,7 +104,6 @@ namespace rovio
         {
             medians.push_back(medianOfMatrix(blocks[i]));
         }
-        std::cout << "Medians calculated" << std::endl;
 
         // Create a new image with the same size as the original image
         imgMedianPatches = cv::Mat::zeros(img.size(), img.type());
