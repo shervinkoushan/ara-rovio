@@ -506,7 +506,7 @@ namespace rovio
 
     void imgDepthCallback(const sensor_msgs::ImageConstPtr &img)
     {
-      const double maxImgDepth = 6.0;
+      // Get image
       cv_bridge::CvImagePtr cvPtr;
       try
       {
@@ -520,21 +520,19 @@ namespace rovio
       cv::Mat cvImg;
       cvPtr->image.copyTo(cvImg);
 
-      const int blockw = 120;
-      const int blockh = 135;
-
+      // Compute patches
+      const int blockW = 16;
+      const int blockH = 15;
       cv::Mat patchedImg;
-      rovio::computeMedianPatches(cvImg, blockw, blockh, patchedImg);
+      rovio::computeMedianPatches(cvImg, blockW, blockH, patchedImg);
 
-      // convert to img msg
+      // Convert to img msg and publish
       cv_bridge::CvImagePtr cvi = cv_bridge::CvImagePtr(new cv_bridge::CvImage);
       cvi->header.stamp = ros::Time::now();
       cvi->header.frame_id = "camera";
       cvi->encoding = sensor_msgs::image_encodings::TYPE_32FC1;
       cvi->image = patchedImg;
       pubImgDepthPatched_.publish(cvi->toImageMsg());
-
-      cv::Mat metricImg = patchedImg / 255.0 * maxImgDepth; // Depth per pixel in meters
     }
 
     /** \brief Image callback for the camera with ID 0
