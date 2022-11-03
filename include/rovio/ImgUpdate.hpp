@@ -29,6 +29,8 @@
 #ifndef ROVIO_IMGUPDATE_HPP_
 #define ROVIO_IMGUPDATE_HPP_
 
+#include <cv_bridge/cv_bridge.h>
+
 #include "lightweight_filtering/common.hpp"
 #include "lightweight_filtering/Update.hpp"
 #include "lightweight_filtering/State.hpp"
@@ -70,6 +72,7 @@ class ImgUpdateMeasAuxiliary: public LWF::AuxiliaryBase<ImgUpdateMeasAuxiliary<S
  public:
   ImgUpdateMeasAuxiliary(){
     reset(0.0);
+    depthImg_ = cv::Mat(480,848,CV_32FC1);
   };
   virtual ~ImgUpdateMeasAuxiliary(){};
   void reset(const double t){
@@ -87,6 +90,11 @@ class ImgUpdateMeasAuxiliary: public LWF::AuxiliaryBase<ImgUpdateMeasAuxiliary<S
   ImagePyramid<STATE::nLevels_> pyr_[STATE::nCam_];
   bool isValidPyr_[STATE::nCam_];
   double imgTime_;
+
+  //depth image
+  cv::Mat depthImg_;
+  void setDepthImg(const cv::Mat& img) { depthImg_ = img; }
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -999,8 +1007,27 @@ ImgOutlierDetection<typename FILTERSTATE::mtState>,false>{
           f.mpStatistics_->resetStatistics(filterState.t_);
           f.mpStatistics_->status_[camID] = TRACKED;
           f.mpStatistics_->lastPatchUpdate_ = filterState.t_;
-          f.mpDistance_->p_ = medianDepthParameters[camID];
           const float initRelDepthCovTemp_ = initCovFeature_(0,0);
+
+          int x = f.mpCoordinates_->get_c().x;
+          int y = f.mpCoordinates_->get_c().y;
+          if ( x < 848 && y < 480){
+            cv::Mat tmpDepth = meas.aux().depthImg_;
+            float depth = tmpDepth.at<float>(y,x); //TODO: optimize this...
+            
+            //std::cout << "depth at pixel " << x << ", " << y << ": " << depth << "\n";
+            
+            if (depth != 0.0) { 
+              f.mpDistance_->p_ = depth / 1000.0;
+              }
+            else {
+              f.mpDistance_->p_ = medianDepthParameters[camID];
+            }
+          }
+          else {
+            f.mpDistance_->p_ = medianDepthParameters[camID];
+          }  
+
           initCovFeature_(0,0) = initRelDepthCovTemp_*pow(f.mpDistance_->getParameterDerivative()*f.mpDistance_->getDistance(),2);
           filterState.resetFeatureCovariance(*it,initCovFeature_);
           initCovFeature_(0,0) = initRelDepthCovTemp_;
