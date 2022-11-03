@@ -218,7 +218,7 @@ namespace rovio
       subImu_ = nh_.subscribe("imu0", 1000, &RovioNode::imuCallback, this);
       subImg0_ = nh_.subscribe("cam0/image_raw", 1000, &RovioNode::imgCallback0, this);
       subImg1_ = nh_.subscribe("cam1/image_raw", 1000, &RovioNode::imgCallback1, this);
-      subDepthImg_ = nh_.subscribe("d455/depth/image_rect_raw", 1000, &RovioNode::imgDepthCallback, this);
+      subDepthImg_ = nh_.subscribe("camera/depth/image_rect_raw", 1000, &RovioNode::imgDepthCallback, this);
       subGroundtruth_ = nh_.subscribe("pose", 1000, &RovioNode::groundtruthCallback, this);
       subGroundtruthOdometry_ = nh_.subscribe("odometry", 1000, &RovioNode::groundtruthOdometryCallback, this);
       subVelocity_ = nh_.subscribe("abss/twist", 1000, &RovioNode::velocityCallback, this);
@@ -524,15 +524,18 @@ namespace rovio
       const int blockW = 16;
       const int blockH = 15;
       cv::Mat patchedImg;
-      rovio::computeMedianPatches(cvImg, blockW, blockH, patchedImg);
+      rovio::patchAndSmoothImage(cvImg, blockW, blockH, patchedImg);
 
       // Convert to img msg and publish
-      cv_bridge::CvImagePtr cvi = cv_bridge::CvImagePtr(new cv_bridge::CvImage);
-      cvi->header.stamp = ros::Time::now();
-      cvi->header.frame_id = "camera";
-      cvi->encoding = sensor_msgs::image_encodings::TYPE_32FC1;
-      cvi->image = patchedImg;
-      pubImgDepthPatched_.publish(cvi->toImageMsg());
+      // cv_bridge::CvImagePtr cvi = cv_bridge::CvImagePtr(new cv_bridge::CvImage);
+      // cvi->header.stamp = ros::Time::now();
+      // cvi->header.frame_id = "camera";
+      // cvi->encoding = sensor_msgs::image_encodings::TYPE_32FC1;
+      // cvi->image = patchedImg;
+      // pubImgDepthPatched_.publish(cvi->toImageMsg());
+
+      // set depth img
+      imgUpdateMeas_.template get<mtImgMeas::_aux>().setDepthImg(patchedImg);
     }
 
     /** \brief Image callback for the camera with ID 0
