@@ -1014,11 +1014,10 @@ ImgOutlierDetection<typename FILTERSTATE::mtState>,false>{
           if ( x < 848 && y < 480){
             cv::Mat tmpDepth = meas.aux().depthImg_;
             float depth = tmpDepth.at<float>(y,x); //TODO: optimize this...
-            
-            //std::cout << "depth at pixel " << x << ", " << y << ": " << depth << "\n";
-            
+                        
             if (depth != 0.0) { 
               f.mpDistance_->p_ = depth / 1000.0;
+                ROS_INFO("depth at pixel %d, %d: %f", x, y, depth / 1000.0);
               }
             else {
               f.mpDistance_->p_ = medianDepthParameters[camID];
