@@ -527,12 +527,12 @@ namespace rovio
       rovio::patchAndSmoothImage(cvImg, blockW, blockH, patchedImg);
 
       // Convert to img msg and publish
-      cv_bridge::CvImagePtr cvi = cv_bridge::CvImagePtr(new cv_bridge::CvImage);
-      cvi->header.stamp = ros::Time::now();
-      cvi->header.frame_id = "camera";
-      cvi->encoding = sensor_msgs::image_encodings::TYPE_32FC1;
-      cvi->image = patchedImg;
-      pubImgDepthPatched_.publish(cvi->toImageMsg());
+      // cv_bridge::CvImagePtr cvi = cv_bridge::CvImagePtr(new cv_bridge::CvImage);
+      // cvi->header.stamp = ros::Time::now();
+      // cvi->header.frame_id = "camera";
+      // cvi->encoding = sensor_msgs::image_encodings::TYPE_32FC1;
+      // cvi->image = patchedImg;
+      // pubImgDepthPatched_.publish(cvi->toImageMsg());
 
       // set depth img
       imgUpdateMeas_.template get<mtImgMeas::_aux>().setDepthImg(patchedImg);
