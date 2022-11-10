@@ -3,6 +3,7 @@
   <include file="$(find realsense2_camera)/launch/rs_camera.launch">
     <arg name="enable_gyro" value="true"/>
     <arg name="enable_accel" value="true"/>
+    <arg name="accel_fps"     value="200"/>
     <arg name="unite_imu_method" value="linear_interpolation"/>
     <arg name="enable_depth"      value="true"/>
     <arg name="enable_color"      value="true"/>
@@ -14,7 +15,7 @@
   <node pkg="topic_tools" name="camera_relay" type="relay" args="/camera/color/grayscale_raw /cam0/image_raw" output="screen"/>
       
   <node pkg="rovio" type="rovio_node" name="rovio" output="screen">
-    <param name="filter_config" value="$(find rovio)/cfg/rovio_d455.info"/>
-    <param name="camera0_config" value="$(find rovio)/cfg/realsense_rgb.yaml"/>
+    <param name="filter_config" value="$(find rovio)/cfg/rovio_d455_kalibr.info"/>
+    <param name="camera0_config" value="$(find rovio)/cfg/rovio_d455_kalibr.yaml"/>
   </node>
 </launch>
