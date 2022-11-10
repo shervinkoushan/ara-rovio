@@ -57,6 +57,7 @@ endif()
 
 ##################### Install ROS stuff #####################
 find_package(catkin REQUIRED COMPONENTS
+	pcl_ros
 	lightweight_filtering
   	kindr
 	roscpp
@@ -120,6 +121,10 @@ add_dependencies(rovio_rosbag_loader ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catki
 add_executable(feature_tracker_node src/feature_tracker_node.cpp)
 target_link_libraries(feature_tracker_node ${PROJECT_NAME})
 add_dependencies(feature_tracker_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+add_executable(vision_node src/TransformPointCloud.cpp)
+target_link_libraries(vision_node ${PROJECT_NAME})
+add_dependencies(vision_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/gtest/")
 	message(STATUS "Building GTests!")

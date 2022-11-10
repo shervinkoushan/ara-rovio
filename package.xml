@@ -28,4 +28,5 @@
   <depend>tf</depend>
   <depend>rosbag</depend>
   <depend>yaml_cpp_catkin</depend>
+    <build_depend>pcl_ros</build_depend>
 </package>
