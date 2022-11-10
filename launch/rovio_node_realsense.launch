@@ -4,6 +4,9 @@
     <arg name="enable_gyro" value="true"/>
     <arg name="enable_accel" value="true"/>
     <arg name="accel_fps"     value="200"/>
+    <arg name="color_width"     value="640"/>
+    <arg name="color_height"    value="360"/>
+    <arg name="color_fps"       value="30"/>
     <arg name="unite_imu_method" value="linear_interpolation"/>
     <arg name="enable_depth"      value="true"/>
     <arg name="enable_color"      value="true"/>
