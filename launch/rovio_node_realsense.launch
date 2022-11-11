@@ -13,6 +13,7 @@
     <arg name="depth_fps"         value="5"/>
     <arg name="enable_sync"       value="true"/>
     <arg name="filters"           value="pointcloud"/>
+    <arg name="pointcloud_texture_stream" value="RS2_STREAM_ANY"/>
     </include>
   <node pkg="rovio" name="to_grayscale" type="to_grayscale.py" args="/camera/color/image_raw /camera/color/grayscale_raw" output="screen"/>
   <node pkg="topic_tools" name="imu_relay" type="relay" args="/camera/imu /imu0" output="screen"/>
