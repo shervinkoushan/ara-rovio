@@ -154,7 +154,6 @@ namespace rovio
     ros::Publisher pubMarkers_; /**<Publisher: Ros line marker, indicating the depth uncertainty of a landmark.*/
     ros::Publisher pubExtrinsics_[mtState::nCam_];
     ros::Publisher pubImuBias_;
-    ros::Publisher pubImgDepthPatched_;
 
     // Ros Messages
     geometry_msgs::TransformStamped transformMsg_;
@@ -228,7 +227,6 @@ namespace rovio
       srvResetToPoseFilter_ = nh_.advertiseService("rovio/reset_to_pose", &RovioNode::resetToPoseServiceCallback, this);
 
       // Advertise topics
-      pubImgDepthPatched_ = nh_.advertise<sensor_msgs::Image>("d455/depth/image_rect_raw_patched", 1000);
       pubTransform_ = nh_.advertise<geometry_msgs::TransformStamped>("rovio/transform", 1);
       pubOdometry_ = nh_.advertise<nav_msgs::Odometry>("rovio/odometry", 1);
       pubPoseWithCovStamped_ = nh_.advertise<geometry_msgs::PoseWithCovarianceStamped>("rovio/pose_with_covariance_stamped", 1);
@@ -506,7 +504,7 @@ namespace rovio
 
     void imgDepthCallback(const sensor_msgs::ImageConstPtr &img)
     {
-      // Get image
+      // Get the depth image
       cv_bridge::CvImagePtr cvPtr;
       try
       {
@@ -520,21 +518,13 @@ namespace rovio
       cv::Mat cvImg;
       cvPtr->image.copyTo(cvImg);
 
-      // Compute patches
+      // Compute patches, take the median and smooth the image
       const int blockW = 16;
       const int blockH = 15;
       cv::Mat patchedImg;
       rovio::patchAndSmoothImage(cvImg, blockW, blockH, patchedImg);
 
-      // Convert to img msg and publish
-      // cv_bridge::CvImagePtr cvi = cv_bridge::CvImagePtr(new cv_bridge::CvImage);
-      // cvi->header.stamp = ros::Time::now();
-      // cvi->header.frame_id = "camera";
-      // cvi->encoding = sensor_msgs::image_encodings::TYPE_32FC1;
-      // cvi->image = patchedImg;
-      // pubImgDepthPatched_.publish(cvi->toImageMsg());
-
-      // set depth img
+      // Set the depth image to initialize the depth in ImgUpdate.hpp
       imgUpdateMeas_.template get<mtImgMeas::_aux>().setDepthImg(patchedImg);
     }
 
