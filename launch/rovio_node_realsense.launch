@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <node pkg="rovio" name="to_grayscale" type="to_grayscale.py" args="/camera/color/image_raw /camera/color/grayscale_raw" output="screen"/>
+  <node pkg="topic_tools" name="imu_relay" type="relay" args="/camera/imu /imu0" output="screen"/>
+  <node pkg="topic_tools" name="camera_relay" type="relay" args="/camera/color/grayscale_raw /cam0/image_raw" output="screen"/>
+
+  <node pkg="rovio" type="rovio_node" name="rovio" output="screen">
+    <param name="filter_config" value="$(find rovio)/cfg/rovio_d455_kalibr.info"/>
+    <param name="camera0_config" value="$(find rovio)/cfg/rovio_d455_kalibr.yaml"/>
+  </node>
+</launch>
+
